@@ -45,3 +45,6 @@ sysinfo.txt
 *.unitypackage
 
 crashlytics-build.properties
+
+# Ignoring audio files since they are too big for git
+*.wav
