@@ -11,7 +11,6 @@ public class WarriorScript : PlayerScript
     protected new void Start()
     {
         basicInits();
-        loadAbilities();
         initStats();
         initAnimations();
         inventory.addItem(new Consumable(0, "Rage Potion", "ResourceHeal", (Texture2D)Resources.Load("Images/RagePotion"), 50));
@@ -23,9 +22,9 @@ public class WarriorScript : PlayerScript
 
     new protected void initStats()
     {
-        damage = 10;
-        speed = 20;
-        jumpSpeed = 10f;
+        damage = DEFAULT_DAMAGE;
+        speed = DEFAULT_SPEED;
+        jumpSpeed = DEFAULT_JUMP_SPEED;
         rageBarLength = regularBarLength;
         if(strength == 0) {
             strength = 5;
@@ -65,11 +64,9 @@ public class WarriorScript : PlayerScript
         GUI.Box(new Rect(10, 60, regularBarLength, 20), currentRage + "/" + getMaxResource());
     }
 
-    protected new void loadAbilities()
+    protected override void loadAbilities()
     {
-        abilities.Add( new Ability( "Weapon", "Melee", 10, 50,
-                (GameObject)Resources.Load("Prefabs/Weapon"),
-                (Texture2D)Resources.Load("Images/WeaponIcon") ) );
+        abilities.Add( (Ability)gameScript.getAbilityMap()["Melee Attack"] );
         selectedAbility = abilities[0];
     }
     

@@ -12,7 +12,6 @@ public class RangerScript : PlayerScript
     protected new void Start()
     {
         basicInits();
-        loadAbilities();
         initStats();
         initAnimations();
         inventory.addItem(new Consumable(0, "Energy Potion", "ResourceHeal", (Texture2D)Resources.Load("Images/EnergyPotion"), 50));
@@ -20,9 +19,9 @@ public class RangerScript : PlayerScript
 
     new protected void initStats()
     {
-        damage = 10;
-        speed = 20;
-        jumpSpeed = 10f;
+        damage = DEFAULT_DAMAGE;
+        speed = DEFAULT_SPEED;
+        jumpSpeed = DEFAULT_JUMP_SPEED;
         energyBarLength = regularBarLength;
         if(strength == 0) {
             strength = 3;
@@ -64,15 +63,10 @@ public class RangerScript : PlayerScript
         GUI.Box(new Rect(10, 60, regularBarLength, 20), currentEnergy + "/" + getMaxResource());
     }
 
-    protected new void loadAbilities()
+    protected override void loadAbilities()
     {
-        abilities.Add( new Ability( "Arrow", "RangedProjectile", 10, 50,
-                (GameObject)Resources.Load("Prefabs/Arrow"),
-                (Texture2D)Resources.Load("Images/ArrowIcon") ) );
-
-        abilities.Add( new Ability( "Weapon", "Melee", 0, 30,
-                (GameObject)Resources.Load("Prefabs/Weapon"),
-                (Texture2D)Resources.Load("Images/WeaponIcon") ) );
+        abilities.Add((Ability)gameScript.getAbilityMap()["Ranged Attack"]);
+        abilities.Add((Ability)gameScript.getAbilityMap()["Melee Attack"]);
 
         selectedAbility = abilities[0];
 

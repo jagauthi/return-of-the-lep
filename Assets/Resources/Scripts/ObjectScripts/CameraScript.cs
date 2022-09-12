@@ -13,7 +13,7 @@ public class CameraScript : MonoBehaviour {
         offset = transform.position - player.transform.position;
         if(turnSpeed == 0)
         {
-            turnSpeed = 15f;
+            turnSpeed = 1f;
         }
     }
 

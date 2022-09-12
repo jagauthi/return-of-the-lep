@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,7 +12,6 @@ public class MageScript : PlayerScript {
     protected new void Start()
     {
         basicInits();
-        loadAbilities();
         initStats();
         initAnimations();
         inventory.addItem(new Consumable(0, "Mana Potion", "ResourceHeal", (Texture2D)Resources.Load("Images/ManaPotion"), 50));
@@ -19,9 +19,9 @@ public class MageScript : PlayerScript {
 
     new protected void initStats()
     {
-        damage = 10;
-        speed = 20;
-        jumpSpeed = 10f;
+        damage = DEFAULT_DAMAGE;
+        speed = DEFAULT_SPEED;
+        jumpSpeed = DEFAULT_JUMP_SPEED;
         manaBarLength = regularBarLength;
         if(strength == 0) {
             strength = 1;
@@ -61,19 +61,11 @@ public class MageScript : PlayerScript {
         GUI.Box(new Rect(10, 60, regularBarLength, 20), currentMana + "/" + getMaxResource());
     }
 
-    protected new void loadAbilities()
+    protected override void loadAbilities()
     {
-        abilities.Add( new Ability( "Fireball", "MagicProjectile", 10, 50,
-                (GameObject)Resources.Load("Prefabs/Fireball"),
-                (Texture2D)Resources.Load("Images/FireballIcon") ) );
-
-        abilities.Add( new Ability( "Frostball", "MagicProjectile", 5, 20,
-                (GameObject)Resources.Load("Prefabs/Frostball"),
-                (Texture2D)Resources.Load("Images/FrostballIcon") ) );
-
-        abilities.Add( new Ability( "Weapon", "Melee", 0, 30,
-                (GameObject)Resources.Load("Prefabs/Weapon"),
-                (Texture2D)Resources.Load("Images/WeaponIcon") ) );
+        abilities.Add((Ability)gameScript.getAbilityMap()["Fireball"]);
+        abilities.Add((Ability)gameScript.getAbilityMap()["Frostball"]);
+        abilities.Add((Ability)gameScript.getAbilityMap()["Melee Attack"]);
 
         selectedAbility = abilities[0];
 
@@ -96,6 +88,12 @@ public class MageScript : PlayerScript {
     protected void Attack(Transform target)
     {
         if(selectedAbility.getName() != "Weapon" && loseResource(selectedAbility.getResourceCost())) {
+
+            //Task task = new Task(async () => {
+                /* Do things */
+            //});
+            //task.Start();
+
             Rigidbody spellClone = Instantiate(selectedAbility.getBody(), transform.position + new Vector3(0.0f, .5f, 0.0f), transform.rotation);
             ProjectileScript bulletScript = (BulletScript)spellClone.gameObject.GetComponent("BulletScript");
             if(bulletScript == null) {

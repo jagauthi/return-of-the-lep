@@ -11,6 +11,7 @@ public class Consumable : Item {
          : base(itemNumber, type, icon) {
         this.consumableType = consumableType;
         this.power = power;
+        this.tooltip = consumableType + ": " + power;
     }
 
     public override bool use() {

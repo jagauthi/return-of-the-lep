@@ -3,7 +3,13 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class PlayerScript : MonoBehaviour {
+public class PlayerScript : MonoBehaviour
+{
+
+    protected int DEFAULT_SPEED = 10;
+    protected int DEFAULT_DAMAGE = 10;
+    protected float DEFAULT_JUMP_SPEED = 5f;
+    protected float DEFAULT_CAMERA_SENSITIVITY = 5f;
 
     protected GameScript gameScript;
     protected Transform selectedTarget;
@@ -43,7 +49,6 @@ public class PlayerScript : MonoBehaviour {
         //Cursor.visible = false;
 
         basicInits();
-        loadAbilities();
         initStats();
         initAnimations();
     }
@@ -51,7 +56,7 @@ public class PlayerScript : MonoBehaviour {
     protected void basicInits()
     {
         player = GameObject.FindGameObjectWithTag("Player");
-        myCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        initCameraSettings();
         player.GetComponent<Renderer>().material.color = Color.black;
         selectedTexture = (Texture2D)Resources.Load("Images/SelectedIcon");
         rigidbody = GetComponent<Rigidbody>();
@@ -60,7 +65,8 @@ public class PlayerScript : MonoBehaviour {
         inventory = new Inventory();
         equipment = new Equipment();
         inventory.addItem(new Consumable(0, "Health Potion", "Heal", (Texture2D)Resources.Load("Images/HealthPotion"), 50));
-        gold = 200;
+        gold = 10;
+        retrieveGameScript();
     }
 
     public GameScript retrieveGameScript() {
@@ -80,9 +86,9 @@ public class PlayerScript : MonoBehaviour {
 
     protected void initStats()
     {
-        damage = 10;
-        speed = 10;
-        jumpSpeed = 5f;
+        damage = DEFAULT_DAMAGE;
+        speed = DEFAULT_SPEED;
+        jumpSpeed = DEFAULT_JUMP_SPEED;
         currentHealth = 100;
         strength = 1;
         intelligence = 1;
@@ -91,16 +97,31 @@ public class PlayerScript : MonoBehaviour {
         interval = 1;
     }
 
+    protected void initCameraSettings()
+    {
+        //This one controls Y axis camera
+        myCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        if( null != myCamera && null != myCamera.GetComponent<MouseLook>())
+        {
+            MouseLook cameraMouseLook = myCamera.GetComponent<MouseLook>();
+            cameraMouseLook.sensitivityY = DEFAULT_CAMERA_SENSITIVITY;
+        }
+
+        //And this one controls X axis camera
+        MouseLook myMouseLook = this.gameObject.GetComponent<MouseLook>();
+        if (null != myMouseLook)
+        {
+            myMouseLook.sensitivityX = DEFAULT_CAMERA_SENSITIVITY;
+        }
+    }
+
     protected void initAnimations() {
         weaponAnimator = GetComponentInChildren<Animator>();   
     }
 
-    protected void loadAbilities()
+    protected virtual void loadAbilities()
     {
-        abilities.Add( new Ability( "Bullet", "RangedProjectile", 0, 30,
-                ( (GameObject)Resources.Load("Prefabs/Bullet") ),
-                (Texture2D)Resources.Load("Images/BulletIcon") ) );
-        selectedAbility = abilities[0];
+
     }
 
     protected void Update() {
@@ -114,6 +135,10 @@ public class PlayerScript : MonoBehaviour {
         if(gameScript == null) {
             getGameScript();
         }
+        if (abilities.Count == 0 && gameScript != null)
+        {
+            loadAbilities();
+        }
         checkInput();
         if (Time.time >= nextTime)
         {
@@ -122,6 +147,7 @@ public class PlayerScript : MonoBehaviour {
         }
         healthBarLength = (regularBarLength) * (currentHealth / (float)getMaxHealth());
         expBarLength = (regularBarLength) * (exp / (float)GetExpToNextLevel());
+        recalculateSpeed();
     }
 
     protected void oncePerSecondUpdate()
@@ -153,7 +179,7 @@ public class PlayerScript : MonoBehaviour {
         {
             transform.Translate(Vector3.right * (speed) * Time.deltaTime);
         }
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             jump();
         }
@@ -199,6 +225,10 @@ public class PlayerScript : MonoBehaviour {
         }
         if(Input.GetKeyDown(KeyCode.LeftShift)) {
             speed += 3;
+        }
+        if (Input.GetKeyDown("["))
+        {
+            LevelUp();
         }
     }
 
@@ -680,5 +710,11 @@ public class PlayerScript : MonoBehaviour {
 
     public Armor getArmorSlot(string slot) {
         return (Armor)equipment.getItemMap()[slot];
+    }
+
+    public void recalculateSpeed()
+    {
+        float agilSpeedModifier = ((1.0f / 4.0f) * (float)agility);
+        speed = DEFAULT_SPEED + (int)agilSpeedModifier;
     }
 }

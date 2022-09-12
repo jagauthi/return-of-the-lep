@@ -98,11 +98,22 @@ public class ShopKeeperScript : NpcScript {
 
                     GUI.DrawTexture( slot, item.getIcon() );
 
+                    //Button to buy the item
                     if (GUI.Button(slot, ""+slotNum)) {
                         if( playerScript.buyItem(item, getCost(item)) )
                         {
                             inventory.Remove(item);
                         }
+                    }
+                    
+                    //cursor tooltip
+                    if (null != item && slot.Contains(Event.current.mousePosition))
+                    {
+                        Rect mouseTextRect = new Rect(
+                            Input.mousePosition.x - inventoryGroupRect.x + (buffer / 2),
+                            Screen.height - Input.mousePosition.y - inventoryGroupRect.y,
+                            item.getTooltip().Length*8, Screen.height / 16 / 2);
+                        GUI.Box(mouseTextRect, item.getTooltip());
                     }
                 }
                 else {

@@ -29,6 +29,7 @@ public class Armor : Item {
         else {
             armorPower = 10;
         }
+        this.tooltip = "Armor: " + armorPower;
     }
 
     public override bool use() {

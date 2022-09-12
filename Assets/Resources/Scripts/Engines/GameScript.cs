@@ -18,6 +18,7 @@ public class GameScript : MonoBehaviour {
     GameObject player;
     GameRestClient restClient;
     ItemHandler itemHandler;
+    Hashtable abilityMap = new Hashtable();
 
     Rect mainGroupRect, levelGroupRect, inventoryGroupRect;
     Rect pointsRect, backgroundRect, strengthRect, strengthTextRect;
@@ -65,7 +66,8 @@ public class GameScript : MonoBehaviour {
         scenes.Add("Stage2");
         scenes.Add("Stage3");
         scenes.Add("FinalStage");
-        initRects(); 
+        initRects();
+        initAbilities();
     }
 
     void initRects() {
@@ -91,6 +93,25 @@ public class GameScript : MonoBehaviour {
 
         quitRect = new Rect(Screen.width/2-buttonLength, 0, buttonLength, buttonLength);
         goldRect = new Rect(inventoryGroupRect.width/16, inventoryGroupRect.height/16, inventoryGroupRect.width/4, inventoryGroupRect.height/16);
+    }
+
+    void initAbilities()
+    {
+        abilityMap.Add("Melee Attack", new Ability("Melee Attack", "Melee", 5, 30,
+                (GameObject)Resources.Load("Prefabs/Weapon"),
+                (Texture2D)Resources.Load("Images/WeaponIcon")));
+
+        abilityMap.Add("Ranged Attack", new Ability("Arrow", "RangedProjectile", 10, 40,
+                (GameObject)Resources.Load("Prefabs/Arrow"),
+                (Texture2D)Resources.Load("Images/ArrowIcon")));
+
+        abilityMap.Add("Fireball", new Ability("Fireball", "MagicProjectile", 10, 40,
+                (GameObject)Resources.Load("Prefabs/Fireball"),
+                (Texture2D)Resources.Load("Images/FireballIcon")));
+
+        abilityMap.Add("Frostball", new Ability("Frostball", "MagicProjectile", 5, 20,
+                (GameObject)Resources.Load("Prefabs/Frostball"),
+                (Texture2D)Resources.Load("Images/FrostballIcon")));
     }
 
     void createPlayer()
@@ -219,65 +240,84 @@ public class GameScript : MonoBehaviour {
         GUI.Label(strengthTextRect, "Strength: " + playerScript.getStrength());
         GUI.Label(agilityTextRect, "Agility: " + playerScript.getAgility());
         GUI.Label(intelligenceTextRect, "Intelligence: " + playerScript.getIntelligence());
-        if (playerScript.getSkillPoints() > 0) {
+        if (playerScript.getSkillPoints() > 0)
+        {
             if (GUI.Button(strengthRect, "+"))
             {
-                playerScript.setStrength(playerScript.getStrength()+1);
-                playerScript.setSkillPoints(playerScript.getSkillPoints()-1);
+                playerScript.setStrength(playerScript.getStrength() + 1);
+                playerScript.setSkillPoints(playerScript.getSkillPoints() - 1);
             }
             if (GUI.Button(agilityRect, "+"))
             {
-                playerScript.setAgility(playerScript.getAgility()+1);
-                playerScript.setSkillPoints(playerScript.getSkillPoints()-1);
+                playerScript.setAgility(playerScript.getAgility() + 1);
+                playerScript.setSkillPoints(playerScript.getSkillPoints() - 1);
             }
             if (GUI.Button(intelligenceRect, "+"))
             {
-                playerScript.setIntelligence(playerScript.getIntelligence()+1);
-                playerScript.setSkillPoints(playerScript.getSkillPoints()-1);
+                playerScript.setIntelligence(playerScript.getIntelligence() + 1);
+                playerScript.setSkillPoints(playerScript.getSkillPoints() - 1);
             }
         }
 
-        int armorButtonLength = (int)(3*levelGroupRect.height / 16);
-        float armorSlotCenterX = 5 * levelGroupRect.width / 8;
-
-        Hashtable playerEquipment = playerScript.getEquipment().getItemMap();
-
-        //Head slot
-        Armor playerHead = (Armor)playerEquipment["Head"];
-        Texture2D helmTexture = (Texture2D)Resources.Load("Images/HeadSlot");
-        Rect headSlot = new Rect(armorSlotCenterX, levelGroupRect.height/8, armorButtonLength, armorButtonLength);
-        this.drawArmorSlot(playerHead, helmTexture, headSlot);
-
-        //Chest slot
-        Armor playerChest = (Armor)playerEquipment["Chest"];
-        Texture2D chestTexture = (Texture2D)Resources.Load("Images/ChestSlot");
-        Rect chestSlot = new Rect(armorSlotCenterX, levelGroupRect.height/8 + armorButtonLength + buffer, armorButtonLength, armorButtonLength);
-        this.drawArmorSlot(playerChest, chestTexture, chestSlot);
-
-        //Legs slot
-        Texture2D legsTexture = (Texture2D)Resources.Load("Images/LegsSlot");
-        if (null != playerEquipment["Legs"])
-        {
-            legsTexture = ((Item)playerEquipment["Legs"]).getIcon();
-        }
-        Rect legsSlot = new Rect(armorSlotCenterX, levelGroupRect.height / 8 + (2*(armorButtonLength + buffer)), armorButtonLength, armorButtonLength);
-        GUI.DrawTexture(legsSlot, legsTexture);
-
-        //Feet slot
-        Texture2D bootsTexture = (Texture2D)Resources.Load("Images/BootsSlot");
-        if (null != playerEquipment["Feet"])
-        {
-            bootsTexture = ((Item)playerEquipment["Feet"]).getIcon();
-        }
-        Rect bootsSlot = new Rect(armorSlotCenterX + armorButtonLength + buffer, levelGroupRect.height / 8 + (2 * (armorButtonLength + buffer)), armorButtonLength, armorButtonLength);
-        GUI.DrawTexture(bootsSlot, bootsTexture);
-
+        drawArmorSlots();
 
         if (GUI.Button(quitRect, "X"))
         {
             playerScript.levelUpToggle();
         }
         GUI.EndGroup();
+    }
+
+    private void drawArmorSlots()
+    {
+        int armorButtonLength = (int)(3 * levelGroupRect.height / 16);
+        float armorSlotCenterX = 5 * levelGroupRect.width / 8;
+        int armorSlotBuffer = buffer / 2;
+        float armorSlotYBuffer = levelGroupRect.height / 8;
+
+        Hashtable playerEquipment = playerScript.getEquipment().getItemMap();
+
+        //Head slot
+        Armor playerHead = (Armor)playerEquipment["Head"];
+        Texture2D helmTexture = (Texture2D)Resources.Load("Images/HeadSlot");
+        Rect headSlot = new Rect(armorSlotCenterX, armorSlotYBuffer, armorButtonLength, armorButtonLength);
+        this.drawArmorSlot(playerHead, helmTexture, headSlot);
+
+        //Chest slot
+        Armor playerChest = (Armor)playerEquipment["Chest"];
+        Texture2D chestTexture = (Texture2D)Resources.Load("Images/ChestSlot");
+        Rect chestSlot = new Rect(armorSlotCenterX, armorSlotYBuffer + armorButtonLength + armorSlotBuffer, armorButtonLength, armorButtonLength);
+        this.drawArmorSlot(playerChest, chestTexture, chestSlot);
+
+        //Legs slot
+        Armor playerLegs = (Armor)playerEquipment["Legs"];
+        Texture2D legsTexture = (Texture2D)Resources.Load("Images/LegsSlot");
+        Rect legsSlot = new Rect(
+            armorSlotCenterX, 
+            armorSlotYBuffer + (2 * (armorButtonLength + armorSlotBuffer)), 
+            armorButtonLength, armorButtonLength);
+        this.drawArmorSlot(playerLegs, legsTexture, legsSlot);
+
+        //Feet slot
+        Armor playerFeet = (Armor)playerEquipment["Feet"];
+        Texture2D feetTexture = (Texture2D)Resources.Load("Images/BootsSlot");
+        Rect feetSlot = new Rect(
+            armorSlotCenterX + armorButtonLength + armorSlotBuffer, 
+            armorSlotYBuffer + (2 * (armorButtonLength + armorSlotBuffer)), 
+            armorButtonLength, armorButtonLength);
+        this.drawArmorSlot(playerFeet, feetTexture, feetSlot);
+
+        //Armor Stats Text
+        int totalArmor = 0;
+        foreach(Armor armor in playerEquipment.Values)
+        {
+            totalArmor += (null != armor) ? armor.getArmorPower() : 0;
+        }
+        Rect armorTextSlot = new Rect(
+            armorSlotCenterX,
+            armorSlotYBuffer + (3 * (armorButtonLength + armorSlotBuffer)), 
+            armorButtonLength, armorButtonLength);
+        GUI.Label(armorTextSlot, "Armor: " + totalArmor);
     }
 
     void drawArmorSlot(Armor armor, Texture2D helmTexture, Rect armorSlot)
@@ -288,15 +328,20 @@ public class GameScript : MonoBehaviour {
             helmTexture = armor.getIcon();
         }
         GUI.DrawTexture(armorSlot, helmTexture);
-        
+
+        if (GUI.Button(armorSlot, ""))
+        {
+            playerScript.getEquipment().unequipArmor(playerScript, armor);
+        }
+
         //cursor tooltip
         if (null != armor && armorSlot.Contains(Event.current.mousePosition))
         {
             Rect mouseTextRect = new Rect(
                 Input.mousePosition.x - levelGroupRect.x + (buffer / 2),
                 Screen.height - Input.mousePosition.y - levelGroupRect.y,
-                4 * buffer / 3, buffer / 2);
-            GUI.Box(mouseTextRect, "Armor: " + armor.getArmorPower());
+                armor.getTooltip().Length * 8, buffer / 2);
+            GUI.Box(mouseTextRect, armor.getTooltip());
         }
     }
 
@@ -321,6 +366,16 @@ public class GameScript : MonoBehaviour {
 
                     if (GUI.Button(slot, ""+slotNum)) {
                         playerScript.useItem(item);
+                    }
+
+                    //cursor tooltip
+                    if (null != item && slot.Contains(Event.current.mousePosition))
+                    {
+                        Rect mouseTextRect = new Rect(
+                            Input.mousePosition.x - inventoryGroupRect.x + (buffer / 2),
+                            Screen.height - Input.mousePosition.y - inventoryGroupRect.y,
+                            item.getTooltip().Length * 8, Screen.height / 16 / 2);
+                        GUI.Box(mouseTextRect, item.getTooltip());
                     }
 
                 }
@@ -407,6 +462,11 @@ public class GameScript : MonoBehaviour {
     public void getItems() {
         IEnumerator getter = restClient.getItems();
         StartCoroutine(getter);
+    }
+
+    public Hashtable getAbilityMap()
+    {
+        return abilityMap;
     }
 
     public void setItems(String items) {

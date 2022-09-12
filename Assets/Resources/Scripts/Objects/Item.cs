@@ -9,12 +9,14 @@ public class Item {
     protected string type;
 	protected Texture2D icon;
     protected PlayerScript playerScript;
+    protected string tooltip;
 
     public Item(int itemNumber, string type, Texture2D icon) {
         this.itemNumber = itemNumber;
         this.type = type;
         this.icon = icon;
         playerScript = null;
+        tooltip = "testTooltip";
     }
 
     public virtual bool use() {
@@ -34,5 +36,10 @@ public class Item {
 
     public string getType() {
         return type;
+    }
+
+    public string getTooltip()
+    {
+        return tooltip;
     }
 }

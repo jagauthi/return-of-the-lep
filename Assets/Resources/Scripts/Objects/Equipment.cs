@@ -35,6 +35,28 @@ public class Equipment {
         //else { return false; }
     }
 
+    public bool unequipArmor(PlayerScript player, Armor armor)
+    {
+        if (null != armor && equipment[armor.getSlot()] != null && equipment[armor.getSlot()].Equals(armor))
+        {
+            if (!player.getInventory().addItem(armor))
+            {
+                Debug.LogError("Cannot unequip, inventory full");
+                return false;
+            }
+            else
+            {
+                equipment[armor.getSlot()] = null;
+                return true;
+            }
+        }
+        else
+        {
+            Debug.Log("This armor isn't equipped, can't unequip it");
+        }
+        return false;
+    }
+
     public List<Item> getItems() {
         List<Item> items = new List<Item>();
         foreach (Item item in equipment.Values) {
