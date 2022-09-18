@@ -42,6 +42,12 @@ public class MageScript : PlayerScript {
     {
         basicUpdates();
         manaBarLength = (regularBarLength) * (currentMana / (float)getMaxResource());
+
+        //Put this in PlayerScript
+        if (casting && (Time.time - castStartTime >= 1))
+        {
+            doAttack();
+        }
     }
 
     protected new void OnGUI()
@@ -81,32 +87,37 @@ public class MageScript : PlayerScript {
     protected override void extraInputs() {
         if (Input.GetButtonDown("Fire2"))
         {
-            Attack(selectedTarget);
+            Attacks();
         }
     }
 
-    protected void Attack(Transform target)
+    protected void Attacks()
     {
-        if(selectedAbility.getName() != "Weapon" && loseResource(selectedAbility.getResourceCost())) {
+        casting = true;
+        castStartTime = Time.time;
+    }
 
-            //Task task = new Task(async () => {
-                /* Do things */
-            //});
-            //task.Start();
+    protected void doAttack()
+    {
+        casting = false;
+        if (selectedAbility.getName() != "Weapon" && loseResource(selectedAbility.getResourceCost()))
+        {
 
             Rigidbody spellClone = Instantiate(selectedAbility.getBody(), transform.position + new Vector3(0.0f, .5f, 0.0f), transform.rotation);
             ProjectileScript bulletScript = (BulletScript)spellClone.gameObject.GetComponent("BulletScript");
-            if(bulletScript == null) {
+            if (bulletScript == null)
+            {
                 bulletScript = (TargetedProjectileScript)spellClone.gameObject.GetComponent("TargetedProjectileScript");
                 TargetedProjectileScript tps = (TargetedProjectileScript)bulletScript;
-                tps.setTarget(target);
-            } 
+                tps.setTarget(selectedTarget);
+            }
             bulletScript.setShooter(this.gameObject);
             bulletScript.setDamage(selectedAbility.getPower());
             spellClone.velocity = myCamera.transform.forward * bulletScript.bulletSpeed;
-            
+
         }
-        else {
+        else
+        {
             weaponAnimator.Play("SwordSwing");
         }
     }

@@ -31,6 +31,8 @@ public class PlayerScript : MonoBehaviour
     protected int skillPoints = 5;
     protected int gold;
     protected bool levelUpMenuToggle = false;
+    protected bool casting;
+    protected float castStartTime;
 
     protected List<Ability> abilities;
     protected List<Quest> activeQuests;
@@ -326,6 +328,7 @@ public class PlayerScript : MonoBehaviour
         drawCrosshair();
         drawHealthBar();
         drawExpBar();
+        drawCastingBar();
         drawAbilities();
         if (selectedTarget != null && selectedTarget.gameObject != null)
         {
@@ -377,6 +380,17 @@ public class PlayerScript : MonoBehaviour
         if(skillPoints > 0)
         {
             GUI.Box(new Rect(regularBarLength + 20, 35, 20, 20), "+");
+        }
+    }
+
+    protected void drawCastingBar()
+    {
+        GUIStyle greenStyle = new GUIStyle(GUI.skin.box);
+        greenStyle.normal.background = MakeTex(2, 2, new Color(0f, 1f, 0f, 0.75f));
+        if (casting)
+        {
+            GUI.Box(new Rect(Screen.width / 4, 3 * Screen.height / 4, regularBarLength, 20), "", greenStyle);
+            GUI.Box(new Rect(Screen.width / 4, 3 * Screen.height / 4, regularBarLength * (Time.time - castStartTime), 20), "" + (1 - (Time.time - castStartTime)));
         }
     }
 
